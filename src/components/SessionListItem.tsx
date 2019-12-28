@@ -1,5 +1,5 @@
-import React, { useRef, useState } from 'react';
-import { IonItemSliding, IonAlert, IonItem, IonLabel, IonItemOptions, IonItemOption, AlertButton } from '@ionic/react';
+import React, { useRef } from 'react';
+import { IonItemSliding, IonItem, IonLabel, IonItemOptions, IonItemOption, AlertButton } from '@ionic/react';
 import { Time } from './Time';
 import { Session } from '../models/Session';
 

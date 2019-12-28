@@ -1,4 +1,4 @@
-import React, { useContext, useEffect, useState, useMemo } from 'react';
+import React, { useContext, useMemo } from 'react';
 import { AppContext } from './AppContext';
 import { DispatchObject } from '../util/types';
 import { AppState } from './state';
@@ -14,34 +14,32 @@ export function connect<TOwnProps = any, TStateProps = any, TDispatchProps = any
   const Connect = (ownProps: TOwnProps) => {
     const context = useContext(AppContext);
 
-    const dispatchFuncs = useMemo(() => {
-      const dispatchFuncs: { [key: string]: any } = {};
-      Object.keys(mapDispatchToProps).forEach((key) => {
-        const oldFunc = (mapDispatchToProps as any)[key];
-        const newFunc = (...args: any) => {
-          const dispatchFunc = oldFunc(...args);
-          if (typeof dispatchFunc === 'object') {
-            context.dispatch(dispatchFunc);
-          } else {
-            const result = dispatchFunc(context.dispatch)
-            if (typeof result === 'object' && result.then) {
-              result.then((dispatchObject?: DispatchObject) => {
-                if (dispatchObject && dispatchObject.type) {
-                  context.dispatch(dispatchObject);
-                }
-              })
+    const props = useMemo(() => {
+      const dispatchFuncs = () => {
+        const dispatchFuncs: { [key: string]: any } = {};
+        Object.keys(mapDispatchToProps).forEach((key) => {
+          const oldFunc = (mapDispatchToProps as any)[key];
+          const newFunc = (...args: any) => {
+            const dispatchFunc = oldFunc(...args);
+            if (typeof dispatchFunc === 'object') {
+              context.dispatch(dispatchFunc);
+            } else {
+              const result = dispatchFunc(context.dispatch)
+              if (typeof result === 'object' && result.then) {
+                result.then((dispatchObject?: DispatchObject) => {
+                  if (dispatchObject && dispatchObject.type) {
+                    context.dispatch(dispatchObject);
+                  }
+                })
+              }
             }
           }
-        }
-        dispatchFuncs[key] = newFunc
-      });
-      return dispatchFuncs;
-    }, [mapDispatchToProps])
-
-
-    const props = useMemo(() => {
+          dispatchFuncs[key] = newFunc
+        });
+        return dispatchFuncs;
+      }
       return Object.assign({}, ownProps, mapStateToProps(context.state, ownProps), dispatchFuncs);
-    }, [ownProps, context.state]);
+    }, [ownProps, context]);
 
     return React.createElement<TOwnProps>(component, props);
   }
